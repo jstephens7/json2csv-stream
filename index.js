@@ -70,10 +70,13 @@ MyStream.prototype = Object.create(Transform.prototype, {
  * @param {String} encoding Encoding of the incoming data. Defaults to 'utf8'
  * @param {Function} done Called when the proceesing of the supplied chunk is done
  */
+var badIdea = "";
+
 MyStream.prototype._transform = function(chunk, encoding, done) {
   var that = this;
 
   chunk = chunk.toString();
+  chunk = badIdea + chunk;
   // regular expression looking for json in chunk
   var re = /(?!\s|\}|$)\{[^\}"]*("(\\.|[^\\"])*"[^\}"]*)*\}/g;
   // see if incoming chunk has a json object
@@ -96,6 +99,7 @@ MyStream.prototype._transform = function(chunk, encoding, done) {
     for (m; m; m = re.exec(chunk)) {
       that.writeLine(m[0]);
     }
+    badIdea = chunk.replace(re, "");
   }
   done();
 };
